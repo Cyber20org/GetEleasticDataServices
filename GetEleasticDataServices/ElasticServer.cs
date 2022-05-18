@@ -16,13 +16,22 @@ namespace Models.Server
     {
         private readonly Timer _timer;
         private readonly string _ConnectionElastic, _Path;
+        private readonly string[] _Emails;
+        private readonly int _MinScore;
 
-        public ElasticServer(string ConnectionElastic)
+        public ElasticServer(string ConnectionElastic,string Emails,string MinScore,string Path)
         {
-
             _ConnectionElastic = ConnectionElastic;
-            string filePath = Assembly.GetExecutingAssembly().Location;
-            _Path = Path.GetDirectoryName(filePath);
+            _Path = Path;
+            _Emails = Emails.Split(',');
+            try
+            {
+                _MinScore = Int32.Parse(MinScore);
+            }
+            catch (FormatException)
+            {
+                _MinScore = 5;
+            }
             _timer = new Timer(60000) { AutoReset = true };
             _timer.Elapsed += TimerElapsed;
         }
@@ -33,13 +42,15 @@ namespace Models.Server
             string RecentLogsFolder = _Path + $"\\RecentLogs";
             DirectoryInfo di = Directory.CreateDirectory(RecentLogsFolder);
 
-            var connectionList = ElasticInit().Where(s => (s.SourceIp != null && (s.SourceIp.Contains("10.")
+            var connectionList = ElasticInit().Where(s =>(s.SourceIp != null && (s.SourceIp.Contains("10.")
                                                                || s.SourceIp.Contains("192.168")
                                                                || s.SourceIp.Contains("172.16")) && s.DestinationIp != null)
                                                                || (s.DestinationIp != null && (s.DestinationIp.Contains("10.")
                                                                || s.DestinationIp.Contains("192.168")
                                                                || s.DestinationIp.Contains("172.16")) && s.SourceIp != null))
                                                                .Distinct();
+
+
 
             int fCount = Directory.GetFiles(RecentLogsFolder, "*", SearchOption.TopDirectoryOnly).Length;
             DateTime dateTime = DateTime.Now;
@@ -55,7 +66,7 @@ namespace Models.Server
                 }
 
             }
-            string fileFullPath = RecentLogsFolder + "\\" + fileName + ".txt";
+            string fileFullPath = RecentLogsFolder + "\\" + fileName + ".Json";
             var translatedData = from x in connectionList
                                  select new
                                  {
@@ -107,15 +118,15 @@ namespace Models.Server
 
                 foreach (ClientsMonitor clients in clientsMonitors.ToList())
                 {
+                    int id = 0;
+
                     List<ElasticDocIndex> doc = GetAllDocumentsInIndex(client, clients, 1);
                     if (doc != null)
                     {
-                        int id = 0;
                         foreach (var item in doc)
                         {
-                            Console.WriteLine("GET DATA.");
-                            Console.WriteLine("GET DATA..");
-                            Console.WriteLine("GET DATA...");
+                            Console.WriteLine(id);
+                            id++;
                             ElasticDocIndex _ealsticView = new ElasticDocIndex
                             {
                                 UserName = clients.ClientName,
