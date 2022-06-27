@@ -7,7 +7,7 @@ namespace Models
     public class ElasticDocIndex
     {
         [Text(Name = "@timestamp")]
-        public DateTime? TimesTamp { get; set; }
+        public DateTime TimesTamp { get; set; }
 
         //[Text(Name = "cast_type")]
         //public string CastType { get; set; }
@@ -22,7 +22,8 @@ namespace Models
         public int? DestinationPort { get; set; }
 
         [Text(Name = "direction")]
-        public string Direction { get; set; }        
+        public string Direction { get; set; }
+
         //[Text(Name = "direction_low")]
         //public byte DirectionFlow { get; set; }
 
@@ -38,8 +39,10 @@ namespace Models
         [Number(DocValues = false, IgnoreMalformed = true, Coerce = true, Name = "mog_counter")]
         [DisplayName("mog_counter")]
         public long? MogCounter { get; set; }
+
         [DisplayName("is_broadcast")]
         public bool IsBroadcast { get; set; }
+
         //[Text(Name = "os")]
         //public string Os { get; set; }
 
@@ -107,7 +110,7 @@ namespace Models
         //public string FullServerTime { get; set; }
 
         //[Text(Name = "chain_array")]
-        //public string ChainArray { get; set; }        
+        //public string ChainArray { get; set; }
         //[Text(Name = "User_PName")]
         public string UserPName { get; set; }
 

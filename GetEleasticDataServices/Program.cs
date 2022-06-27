@@ -1,26 +1,29 @@
-﻿using System;
+﻿using Models.Server;
+using System;
 using System.Configuration;
-using Models.Server;
+using System.Text.RegularExpressions;
 using Topshelf;
 
 namespace GetEleasticDataServices
 {
     internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-
-            string ConnectionElastic, Emails, MinScore, Path;
-            ConnectionElastic = ConfigurationManager.AppSettings.Get("ConnectionElastic");
-            Emails = ConfigurationManager.AppSettings.Get("Emails");
-            MinScore = ConfigurationManager.AppSettings.Get("MinScore");
-            Path = ConfigurationManager.AppSettings.Get("Path");
+            string ConnectionElastic, Emails, MinScore, Path, AbuseDbIpKey, interval, ServerName;
+            ConnectionElastic = Regex.Replace(ConfigurationManager.AppSettings.Get("ConnectionElastic"), @"\t|\n|\r", "");
+            Emails = Regex.Replace(ConfigurationManager.AppSettings.Get("Emails"), @"\t|\n|\r", "");
+            MinScore = Regex.Replace(ConfigurationManager.AppSettings.Get("MinScore"), @"\t|\n|\r", "");
+            interval = Regex.Replace(ConfigurationManager.AppSettings.Get("Interval"), @"\t|\n|\r", "");
+            Path = Regex.Replace(ConfigurationManager.AppSettings.Get("Path"), @"\t|\n|\r", "");
+            ServerName = Regex.Replace(ConfigurationManager.AppSettings.Get("ServerName"), @"\t|\n|\r", "");
+            AbuseDbIpKey = Regex.Replace(ConfigurationManager.AppSettings.Get("AbuseDbIpKey"), @"\t|\n|\r", "");
 
             var exitCode = HostFactory.Run(x =>
             {
                 x.Service<ElasticServer>(s =>
                 {
-                    s.ConstructUsing(elasticSearch => new ElasticServer(ConnectionElastic, Emails, MinScore, Path));
+                    s.ConstructUsing(elasticSearch => new ElasticServer(ConnectionElastic, Emails, MinScore, Path, AbuseDbIpKey, interval, ServerName));
                     s.WhenStarted(elasticSearch => elasticSearch.Start());
                     s.WhenStopped(elasticSearch => elasticSearch.Stop());
                 });
@@ -36,4 +39,3 @@ namespace GetEleasticDataServices
         }
     }
 }
-
